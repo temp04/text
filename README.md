@@ -17,7 +17,7 @@ We are using GPT + UEFI + Btrfs + GRUB2 with the following scheme
 | Partition      | Filesystem | Size             | Mountpoint | Description
 |----------------|------------|------------------|------------|-----------------------------------------
 | /dev/nvme0n1p1 | FAT32      | 512 MiB          | /efi       | EFI system partition
-| /dev/nvme0n1p2 | swap       | 12 GB            | none       | Generous amount of swap (core count * 2)
+| /dev/nvme0n1p2 | swap       | 12 GiB           | none       | Generous amount of swap (core count * 2)
 | /dev/nvme0n1p3 | Btrfs      | Rest of the disk | /          | Root filesystem
 
 * [What size should the ESP be?](https://forums.gentoo.org/viewtopic-p-8534167.html?sid=3c6cbac0f4df783e368a749df8bfd2f1#8534167)
@@ -41,19 +41,25 @@ Btrfs volumes and subvolumes
 Using `parted`
 
 ```console
-parted /dev/nvme0n1
+parted -a optimal /dev/nvme0n1
+unit mib
+mkpart esp 1 513
+mkpart swap 513 12801
+mkpart rootfs 12801 -1
+set 1 boot on
+print
 ```
 
 ### Create filesystems
 
-Format partitions and add labels
+Format partitions
 ```console
-mkfs.vfat -F 32 -n esp /dev/nvme0n1p1
-mkfs.btrfs -L rootfs /dev/nvme0n1p3
+mkfs.vfat -F32 /dev/nvme0n1p1
+mkfs.btrfs /dev/nvme0n1p3
 ```
 Make swap
 ```console
-mkswap -L swap /dev/nvme0n1p2
+mkswap /dev/nvme0n1p2
 swapon /dev/nvme0n1p2
 ```
 ### Create subvolumes
