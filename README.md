@@ -21,3 +21,14 @@ We are using GPT + UEFI + Btrfs + GRUB2 with the following scheme:
 | `/dev/nvme0n1p3` | Btrfs      | Rest of the disk | `/`        | Root filesystem
 
 * [What size should the ESP be?](https://forums.gentoo.org/viewtopic-p-8534167.html?sid=3c6cbac0f4df783e368a749df8bfd2f1#8534167)
+
+Btrfs volumes and subvolumes:
+
+| Partition        | (Sub)volume name | Mountpoint            | Description
+|------------------|------------------|-----------------------|-----------------------------
+| `/dev/nvme0n1p3` | rootfs           | `none`                | Primary volume
+| `/dev/nvme0n1p3` | @gentoo          | `/`                   | Root subvolume
+| `/dev/nvme0n1p3` | @home            | `/home`               | Personal fiiles
+| `/dev/nvme0n1p3` | @boot            | `none`                | Kernels and files for GRUB2
+| `/dev/nvme0n1p3` | @snapshots       | `none`                | Keep snapshots unmounted
+| `/dev/nvme0n1p3` | @steam           | `/home/temp04/.steam` | Steam games and files
