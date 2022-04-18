@@ -26,9 +26,10 @@ Btrfs volumes and subvolumes:
 
 | Partition        | (Sub)volume name | Mountpoint            | Description
 |------------------|------------------|-----------------------|-----------------------------
-| `/dev/nvme0n1p3` | rootfs           | `none`                | Primary volume
+| `/dev/nvme0n1p3` | rootfs           | `none`                | Btrfs filesystem volume
 | `/dev/nvme0n1p3` | @gentoo          | `/`                   | Root subvolume
 | `/dev/nvme0n1p3` | @home            | `/home`               | Personal fiiles
-| `/dev/nvme0n1p3` | @boot            | `none`                | Kernels and files for GRUB2
-| `/dev/nvme0n1p3` | @snapshots       | `none`                | Keep snapshots unmounted
+| `/dev/nvme0n1p3` | @boot            | `/boot`               | Kernels and files for GRUB2
+| `/dev/nvme0n1p3` | @snapshots       | `/snapshots`          | Btrfs snapshots
 | `/dev/nvme0n1p3` | @steam           | `/home/temp04/.steam` | Steam games and files
+| `/dev/nvme0n1p3` | @virt            | `/virt`               | Virtual machines
