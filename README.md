@@ -40,38 +40,40 @@ Btrfs volumes and subvolumes
 
 Using `parted`
 
-```console
+```bash
 parted -a optimal /dev/nvme0n1
 unit mib
+mklabel gpt
 mkpart esp 1 513
 mkpart swap 513 12801
 mkpart rootfs 12801 -1
 set 1 boot on
 print
+quit
 ```
 
-### Create filesystems
+### Make filesystems
 
 Format partitions
-```console
+```bash
 mkfs.vfat -F32 /dev/nvme0n1p1
 mkfs.btrfs /dev/nvme0n1p3
 ```
 Make swap
-```console
+```bash
 mkswap /dev/nvme0n1p2
 swapon /dev/nvme0n1p2
 ```
-### Create subvolumes
+### Btrfs subvolumes
 
 Mount the root partition
-```console
+```bash
 mkdir -p /mnt/gentoo
 mount /dev/nvme0n1p3 /mnt/gentoo
 ```
 
-Btrfs subvolumes
-```console
+Create subvolumes
+```bash
 cd /mnt/gentoo
 btrfs subvol create @gentoo
 btrfs subvol create @home
@@ -80,3 +82,29 @@ btrfs subvol create @snapshots
 btrfs subvol create @steam
 btrfs subvol create @virt
 ```
+
+Mount subvolumes
+```bash
+# first unmount
+cd ..
+umount -l gentoo
+
+# then, remount
+mount -o subvol=@gentoo /dev/nvme0n1p3 /mnt/gentoo
+
+# make directories
+cd gentoo
+mkdir home boot snapshots virt efi
+
+# mount remaining subvolumes
+
+mount -o subvol=@home /dev/nvme0n1p3 /mnt/gentoo/home
+mount -o subvol=@boot /dev/nvme0n1p3 /mnt/gentoo/boot
+mount -o subvol=@snapshots /dev/nvme0n1p3 /mnt/gentoo/snapshots
+mount -o subvol=@virt /dev/nvme0n1p3 /mnt/gentoo/virt
+
+# mount esp
+mount /dev/nvme0n1p1 /mnt/gentoo/efi
+```
+
+* [Example setup from a Gentoo user](https://gist.github.com/renich/90e0a5bed8c7c0de40d40ac9ccac6dfd)
