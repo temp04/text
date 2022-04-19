@@ -235,10 +235,22 @@ sys-kernel/linux-firmware @BINARY-REDISTRIBUTABLE
 
 Necessary packages and utilities
 ```bash
-emerge gentoolkit linux-firmware gentoo-kernel-bin bash-completion btrfs-progs
+# important packages
+emerge linux-firmware gentoo-kernel-bin nvidia-drivers
+
+# qol packages
+emerge gentoolkit bash-completion btrfs-progs konsole firefox-bin
 ```
 
 * [Gentoo Wiki page for dispatch-conf](https://wiki.gentoo.org/wiki/Dispatch-conf)
+
+### Systemd services
+
+Enable these services for a painless reboot
+```bash
+systemctl enable sddm.service
+systemctl enable NetworkManager
+```
 
 ## Creating the fstab file
 
