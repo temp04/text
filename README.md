@@ -99,7 +99,6 @@ cd gentoo
 mkdir home boot snapshots virt efi
 
 # mount remaining subvolumes
-
 mount -o subvol=@home /dev/nvme0n1p3 /mnt/gentoo/home
 mount -o subvol=@boot /dev/nvme0n1p3 /mnt/gentoo/boot
 mount -o subvol=@snapshots /dev/nvme0n1p3 /mnt/gentoo/snapshots
@@ -178,4 +177,30 @@ Entering the new environement
 chroot . /bin/bash
 source /etc/profile
 export PS1="(chroot) ${PS1}"
+```
+
+## Installing the Gentoo base system
+
+First, fetch the lastest ebuild repository snapshot
+```bash
+emerge-webrsync
+```
+
+Then, read the news
+```bash
+eselect news list
+eselect news read
+```
+
+Pick the right profile
+```bash
+eselect profile list
+
+# we kde plasma
+eselect profile set 9
+```
+
+Now, go to sleep :zzz:
+```bash
+emerge --ask --verbose --update --deep --newuse @world
 ```
