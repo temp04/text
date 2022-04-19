@@ -13,7 +13,7 @@ Laptop specs
 
 ### Overview
 
-We are using GPT + UEFI + Btrfs + GRUB2 with the following scheme
+We are using GPT/UEFI + Btrfs + GRUB2 with the following scheme
 | Partition      | Filesystem | Size             | Mountpoint | Description
 |----------------|------------|------------------|------------|-----------------------------------------
 | /dev/nvme0n1p1 | FAT32      | 512 MiB          | /efi       | EFI system partition
@@ -52,6 +52,8 @@ print
 quit
 ```
 
+* [Very good ressource for Gentoo on ZFS](https://wiki.gentoo.org/wiki/User:Fearedbliss/Installing_Gentoo_Linux_On_ZFS)
+
 ### Make filesystems
 
 Format partitions
@@ -85,7 +87,7 @@ btrfs subvol create @virt
 
 Mount subvolumes
 ```bash
-# first unmount
+# first, unmount
 cd ..
 umount -l gentoo
 
@@ -107,4 +109,73 @@ mount -o subvol=@virt /dev/nvme0n1p3 /mnt/gentoo/virt
 mount /dev/nvme0n1p1 /mnt/gentoo/efi
 ```
 
+**TIP:** Show mounted subvolumes with `findmnt -nt btrfs`
 * [Example setup from a Gentoo user](https://gist.github.com/renich/90e0a5bed8c7c0de40d40ac9ccac6dfd)
+
+
+## Prepararing the chroot environement
+
+### Installing stage3
+
+Grab the latest stage3 tarball [from here](https://www.gentoo.org/downloads/)
+```bash
+cd /mnt/gentoo
+wget https://bouncer.gentoo.org/fetch/root/all/releases/amd64/autobuilds/20220417T171236Z/stage3-amd64-desktop-systemd-20220417T171236Z.tar.xz
+
+# extract archive
+tar xpvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner
+```
+
+### Configure compile options
+
+We keep it basic
+```bash
+nano ect/portage/make.conf
+
+# safe cflags
+COMMON_FLAGS="-march=native -O2 -pipe"
+CFLAGS="${COMMON_FLAGS}"
+CXXFLAGS="${COMMON_FLAGS}"
+
+# a bit risky maybe
+MAKEOPTS="-j8"
+```
+
+### More configuration
+
+Portage
+```bash
+mkdir -p etc/portage/repos.conf
+cp usr/share/portage/config/repos.conf etc/portage/repos.conf/gentoo.conf
+cat etc/portage/repos.conf/gentoo.conf
+```
+
+DNS
+```bash
+cp --dereference /etc/resolv.conf etc/
+cat etc/resolv.conf
+```
+
+### Mounting the necessary filesystems
+
+Here we go
+```bash
+mount --types proc /proc proc
+mount --rbind /sys sys
+mount --rbind /dev dev
+mount --bind /run run
+
+# systemd
+mount --make-rslave sys
+mount --make-rslave dev
+mount --make-slave run
+```
+
+### Chrooting
+
+Entering the new environement
+```bash
+chroot . /bin/bash
+source /etc/profile
+export PS1="(chroot) ${PS1}"
+```
