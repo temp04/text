@@ -239,7 +239,7 @@ Necessary packages and utilities
 emerge linux-firmware gentoo-kernel-bin nvidia-drivers
 
 # qol packages
-emerge gentoolkit bash-completion btrfs-progs konsole firefox-bin
+emerge gentoolkit genlop bash-completion btrfs-progs konsole firefox-bin dev-vcs/git
 ```
 
 * [Gentoo Wiki page for dispatch-conf](https://wiki.gentoo.org/wiki/Dispatch-conf)
@@ -257,11 +257,15 @@ systemctl enable NetworkManager
 Current file
 ```bash
 # <fs>                                          <mnt>   <type>  <opts>                  <dump/pass>
-UUID="3C5E-6730"                                /efi    vfat    defaults                0 2
+UUID="3C5E-6730"                                /efi    vfat    noauto                  0 2
 UUID="f3120bf4-4283-4d68-9048-0aae99195fd7"     none    swap    sw                      0 0
 UUID="c3830926-0109-42c1-a9cd-45f41f0d602e"     /       btrfs   defaults,subvol=@gentoo 0 1
+UUID="c3830926-0109-42c1-a9cd-45f41f0d602e"     /boot   btrfs   defaults,subvol=@boot   0 2
 UUID="c3830926-0109-42c1-a9cd-45f41f0d602e"     /home   btrfs   defaults,subvol=@home   0 2
+UUID="c3830926-0109-42c1-a9cd-45f41f0d602e"     /virt   btrfs   defaults,subvol=@virt   0 2
 ```
+
+* [Btrfs sysadmin guide on kernel.org](https://btrfs.wiki.kernel.org/index.php/SysadminGuide)
 
 ## Configuring the bootloader (GRUB2)
 
