@@ -34,6 +34,8 @@ Btrfs volumes and subvolumes
 | /dev/nvme0n1p3 | @steam           | /home/temp04/.steam | Steam games and files
 | /dev/nvme0n1p3 | @virt            | /virt               | Virtual machines
 
+* [Btrfs scheme reference](https://old.reddit.com/r/btrfs/comments/9us4hr/what_is_your_btrfs_partitionsubvolumes_scheme/e973hym/)
+
 ---
 
 ### Make partitions
@@ -138,6 +140,13 @@ CXXFLAGS="${COMMON_FLAGS}"
 
 # a bit risky maybe
 MAKEOPTS="-j8"
+
+# sensible defaults
+# 5.1 is 85% load for 6 cores (6*0.85)
+EMERGE_DEFAULT_OPS="--ask --verbose --quiet --ask-enter-invalid --load-average 5.1"
+
+# graphics
+VIDEO_CARDS="nvidia"
 ```
 
 ### More configuration
@@ -181,6 +190,8 @@ export PS1="(chroot) ${PS1}"
 
 ## Installing the Gentoo base system
 
+### Emerge
+
 First, fetch the lastest ebuild repository snapshot
 ```bash
 emerge-webrsync
@@ -202,5 +213,90 @@ eselect profile set 9
 
 Now, go to sleep :zzz:
 ```bash
+# emerge -uDN @world
 emerge --ask --verbose --update --deep --newuse @world
+```
+Install full KDE desktop (hopefully)
+```bash
+# i used makeopts -j2 on this
+# probably bad
+emerge kde-plasma/plasma-meta --jobs 6
+```
+
+### Kernel configuration
+
+Edit this file to unmask `linux-firmware`
+```bash
+nano /etc/portage/package.license/kernel
+
+# append
+sys-kernel/linux-firmware @BINARY-REDISTRIBUTABLE
+```
+
+Necessary packages and utilities
+```bash
+emerge gentoolkit linux-firmware gentoo-kernel-bin bash-completion btrfs-progs
+```
+
+* [Gentoo Wiki page for dispatch-conf](https://wiki.gentoo.org/wiki/Dispatch-conf)
+
+## Creating the fstab file
+
+Current file
+```bash
+# <fs>                                          <mnt>   <type>  <opts>                  <dump/pass>
+UUID="3C5E-6730"                                /efi    vfat    defaults                0 2
+UUID="f3120bf4-4283-4d68-9048-0aae99195fd7"     none    swap    sw                      0 0
+UUID="c3830926-0109-42c1-a9cd-45f41f0d602e"     /       btrfs   defaults,subvol=@gentoo 0 1
+UUID="c3830926-0109-42c1-a9cd-45f41f0d602e"     /home   btrfs   defaults,subvol=@home   0 2
+```
+
+## Configuring the bootloader (GRUB2)
+
+Install GRUB
+```bash
+emerge -DN grub
+grub-install --target=x86_64-efi --efi-directory=/efi
+```
+
+Configure it
+```bash
+grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+## Finalizing steps
+
+Add user with sudo privileges
+```bash
+# install sudo
+emerge sudo
+
+# make admin user
+useradd -m -G users,wheel,audio -s /bin/bash temp04
+passwd temp04
+```
+
+If you can't use weak passwords, edit the following file
+```bash
+nano /etc/security/passwdqc.conf
+
+# don't enforce password policy
+enforce=none
+```
+
+Edit sudoers
+```bash
+## Uncomment to allow members of group wheel to execute any command
+%wheel ALL=(ALL) ALL
+```
+
+## Rebooting the system
+
+Exit and pray 🙏
+```bash
+exit
+cd
+umount -l /mnt/gentoo/dev{/shm,/pts,}
+umount -R /mnt/gentoo
+reboot
 ```
